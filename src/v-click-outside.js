@@ -25,9 +25,9 @@ function processDirectiveArguments(bindingValue) {
   }
 }
 
-function execHandler({ event, handler, middleware }) {
-  if (middleware(event)) {
-    handler(event)
+function execHandler({ event, handler, middleware, isClickOutside }) {
+  if (middleware(event, isClickOutside)) {
+    handler(event, isClickOutside)
   }
 }
 
@@ -37,13 +37,13 @@ function onFauxIframeClick({ el, event, handler, middleware }) {
   // https://stackoverflow.com/q/2381336#comment61192398_23231136
   setTimeout(() => {
     const { activeElement } = document
-    if (
+    const isClickOutside = !(
       activeElement &&
       activeElement.tagName === 'IFRAME' &&
       !el.contains(activeElement)
-    ) {
-      execHandler({ event, handler, middleware })
-    }
+    ) 
+    
+    execHandler({ event, handler, middleware, isClickOutside })    
   }, 0)
 }
 
@@ -57,11 +57,7 @@ function onEvent({ el, event, handler, middleware }) {
     ? path.indexOf(el) < 0
     : !el.contains(event.target)
 
-  if (!isClickOutside) {
-    return
-  }
-
-  execHandler({ event, handler, middleware })
+  execHandler({ event, handler, middleware, isClickOutside })
 }
 
 function bind(el, { value }) {
